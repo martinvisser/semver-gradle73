@@ -16,8 +16,10 @@ repositories {
 }
 
 gradlePlugin {
+    isAutomatedPublishing = false
+
     plugins {
-        create("example") {
+        register("example") {
             id = "com.example.plugin.semver"
             implementationClass = "com.example.plugin.ExamplePlugin"
             displayName = "Example"
@@ -29,6 +31,29 @@ gradlePlugin {
 publishing {
     repositories {
         mavenLocal()
+    }
+
+    // Overrides the behaviour gradlePlugin would add if isAutomatedPublishing is set to true
+    publications {
+        register<MavenPublication>("pluginMaven") {
+            from(components["java"])
+        }
+
+        gradlePlugin.plugins.all {
+            register<MavenPublication>("${name}PluginMarkerMaven") {
+                groupId = id
+                artifactId = "${id}.gradle.plugin"
+
+                pom.withXml {
+                    asNode().appendNode("name", displayName)
+                    asNode().appendNode("description", description)
+                    val dependency = asNode().appendNode("dependencies").appendNode("dependency")
+                    dependency.appendNode("groupId", group)
+                    dependency.appendNode("artifactId", rootProject.name)
+                    dependency.appendNode("version", version)
+                }
+            }
+        }
     }
 }
 
