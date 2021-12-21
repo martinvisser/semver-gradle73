@@ -26,14 +26,13 @@ gradlePlugin {
     }
 }
 
-idea {
-    module {
-        inheritOutputDirs = false
+publishing {
+    repositories {
+        mavenLocal()
     }
 }
 
 tasks {
-    // for dev builds:
     incrementBuildMeta {
         doFirst {
             buildMeta = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
